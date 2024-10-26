@@ -138,7 +138,7 @@ def preprocess_and_extract_features_mne_with_timestamps(file_name):
         # 获取窗口的开始时间戳
         timestamp = raw.times[start]
         # 定义需要提取特征的通道索引
-        channel_indexes = [0, 9, 20]
+        channel_indexes = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22]
         # 为每个通道的每个窗口提取基础和高级特征
         combined_channels_features = None
 
