@@ -29,6 +29,7 @@ def load_data(subject_id,base_path):
     all_X = []
     all_y = []
     for edf_file_path in edf_file_path:
+        print("正在加载{}...".format(edf_file_path))
         X, y = extract_data_and_labels(edf_file_path, summary_file_path)
         all_X.append(X)
         all_y.append(y)

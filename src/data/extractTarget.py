@@ -2,8 +2,8 @@ import os
 def extractTarget(summary_file_path, edf_file_path):
     edf_file_name = os.path.basename(edf_file_path)
     # 初始化变量
-    seizure_start_time = None
-    seizure_end_time = None
+    seizure_start_time = -1
+    seizure_end_time = -2
     # 打开并读取文本文件
     with open(summary_file_path, 'r') as file:
         lines = file.readlines()
@@ -15,7 +15,7 @@ def extractTarget(summary_file_path, edf_file_path):
             found = True
         if found:
             if "Number of Seizures in File: 0" in line:
-                return None, None  # 没有癫痫发作，直接返回 None
+                return -1, -2  # 没有癫痫发作，直接返回 None
             if "Seizure Start Time:" in line:
                 seizure_start_time = int(line.split(": ")[1].split(" ")[0])
             if "Seizure End Time:" in line:
