@@ -51,5 +51,5 @@ Temporary Items
 .apdisk
 
 # data
-data/
-data_wos/
+data/*
+data_wos/*
