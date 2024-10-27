@@ -143,16 +143,11 @@ def preprocess_and_extract_features_mne_with_timestamps(file_name):
         window_data_raw = np.squeeze(window_data_raw)
 
         # 对每个子带提取窗口数据
-        window_data_delta, _ = delta[:, start:end]
-        window_data_delta = np.squeeze(window_data_delta)
-        window_data_theta, _ = theta[:, start:end]
-        window_data_theta = np.squeeze(window_data_theta)
-        window_data_alpha, _ = alpha[:, start:end]
-        window_data_alpha = np.squeeze(window_data_alpha)
-        window_data_beta, _ = beta[:, start:end]
-        window_data_beta = np.squeeze(window_data_beta)
-        window_data_gamma, _ = gamma[:, start:end]
-        window_data_gamma = np.squeeze(window_data_gamma)
+        window_data_delta = delta[:, start:end].get_data()[0]
+        window_data_theta = theta[:, start:end].get_data()[0]
+        window_data_alpha = alpha[:, start:end].get_data()[0]
+        window_data_beta = beta[:, start:end].get_data()[0]
+        window_data_gamma = gamma[:, start:end].get_data()[0]
 
         # 获取窗口的开始时间戳
         timestamp = raw.times[start]
@@ -166,28 +161,20 @@ def preprocess_and_extract_features_mne_with_timestamps(file_name):
 
         # 提取delta子带的基本特征
         basic_features_delta = extract_basic_features(window_data_delta)
-        all_features.append(basic_features_delta)
 
         # 提取theta子带的基本特征
         basic_features_theta = extract_basic_features(window_data_theta)
-        all_features.append(basic_features_theta)
 
         # 提取alpha子带的基本特征
         basic_features_alpha = extract_basic_features(window_data_alpha)
-        all_features.append(basic_features_alpha)
 
         # 提取beta子带的基本特征
         basic_features_beta = extract_basic_features(window_data_beta)
-        all_features.append(basic_features_beta)
 
         # 提取gamma子带的基本特征
         basic_features_gamma = extract_basic_features(window_data_gamma)
-        all_features.append(basic_features_gamma)
-
-        # 将所有特征连接起来
-        combined_features = np.concatenate(all_features)
 
         # 将特征与时间戳结合
-        combined_features_with_timestamp = np.concatenate([[timestamp], combined_features])
+        combined_features_with_timestamp = np.concatenate([[timestamp], basic_features_raw, basic_features_delta, basic_features_theta, basic_features_alpha, basic_features_beta, basic_features_gamma])
         features_with_timestamps.append(combined_features_with_timestamp)
     return np.array(features_with_timestamps)
