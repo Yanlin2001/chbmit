@@ -143,11 +143,16 @@ def preprocess_and_extract_features_mne_with_timestamps(file_name):
         window_data_raw = np.squeeze(window_data_raw)
 
         # 对每个子带提取窗口数据
-        window_data_delta = delta[:, start:end].get_data()[0]
-        window_data_theta = theta[:, start:end].get_data()[0]
-        window_data_alpha = alpha[:, start:end].get_data()[0]
-        window_data_beta = beta[:, start:end].get_data()[0]
-        window_data_gamma = gamma[:, start:end].get_data()[0]
+        window_data_delta, _ = delta[:, start:end]
+        window_data_delta = np.squeeze(window_data_delta)
+        window_data_theta, _ = theta[:, start:end]
+        window_data_theta = np.squeeze(window_data_theta)
+        window_data_alpha, _ = alpha[:, start:end]
+        window_data_alpha = np.squeeze(window_data_alpha)
+        window_data_beta, _ = beta[:, start:end]
+        window_data_beta = np.squeeze(window_data_beta)
+        window_data_gamma, _ = gamma[:, start:end]
+        window_data_gamma = np.squeeze(window_data_gamma)
 
         # 获取窗口的开始时间戳
         timestamp = raw.times[start]
