@@ -160,7 +160,7 @@ def preprocess_and_extract_features_mne_with_timestamps(file_name, seizure_start
         # 获取窗口的开始时间戳
         timestamp = raw.times[start]
         # 间隔1个通道提取特征
-        channel_indexes = list(range(0, 24, 3))
+        channel_indexes = list(range(0, 22))
         #channel_indexes = [3, 4, 8, 15]  # 通道索引范围
         combined_channels_features = None
         for idx, (raw_data, delta_data, theta_data, alpha_data, beta_data, gamma_data) in enumerate(zip(window_data_raw, window_data_delta, window_data_theta, window_data_alpha, window_data_beta, window_data_gamma)):
