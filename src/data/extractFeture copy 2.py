@@ -90,7 +90,7 @@ def extract_wavelet_features(signal, sfreq):
 
     return wavelet_features
 
-def preprocess_and_extract_features_mne_with_timestamps(file_name, seizure_start_time, seizure_end_time):  
+def preprocess_and_extract_features_mne_with_timestamps(file_name, seizure_start_time, seizure_end_time):
     """
     使用 mne 库预处理 EEG 数据，并提取基础和高级特征。
     在每个特征数组的开头加入对应的时间戳。
@@ -133,9 +133,10 @@ def preprocess_and_extract_features_mne_with_timestamps(file_name, seizure_start
     total_windows = len(raw.times) // window_samples
 
     # 使用tqdm包装range对象以显示进度条
-
-    for start in tqdm(range(0, len(raw.times), window_samples), total=total_windows, desc="Processing windows"):
-        end = start + window_samples
+    total_samples = int(len(raw.times)/256)
+    for start in tqdm(range(0, total_samples, window_length), total=total_windows, desc="Processing windows"):
+        end = start + window_length
+        if start > len(raw.times):
         if end > len(raw.times):
             break
 
@@ -160,9 +161,8 @@ def preprocess_and_extract_features_mne_with_timestamps(file_name, seizure_start
         # 获取窗口的开始时间戳
         timestamp = raw.times[start]
         # 间隔1个通道提取特征
-        channel_indexes = list(range(0, 24, 3))
+        channel_indexes = list(range(0, 24, 2))
         #channel_indexes = [3, 4, 8, 15]  # 通道索引范围
-        combined_channels_features = None
         for idx, (raw_data, delta_data, theta_data, alpha_data, beta_data, gamma_data) in enumerate(zip(window_data_raw, window_data_delta, window_data_theta, window_data_alpha, window_data_beta, window_data_gamma)):
             if idx in channel_indexes:
                 # 提取原始信号的基本特征
@@ -174,22 +174,14 @@ def preprocess_and_extract_features_mne_with_timestamps(file_name, seizure_start
                 basic_features_gamma = extract_basic_features(gamma_data)
 
                 # 确保特征都是一维的
-                combined_channels_features = np.concatenate([
-                    combined_channels_features,
-                    basic_features_raw, 
-                    basic_features_delta, 
-                    basic_features_theta, 
-                    basic_features_alpha, 
-                    basic_features_beta, 
-                    basic_features_gamma]) if combined_channels_features is not None else np.concatenate([
-                        basic_features_raw, 
-                        basic_features_delta, 
-                        basic_features_theta, 
-                        basic_features_alpha, 
-                        basic_features_beta, 
-                        basic_features_gamma])
-        combined_features_with_timestamp = np.concatenate([[timestamp], combined_channels_features])
-        features_with_timestamps.append(combined_features_with_timestamp)
+                combined_features_with_timestamp = np.concatenate([[timestamp], 
+                                                                np.ravel(basic_features_raw), 
+                                                                np.ravel(basic_features_delta), 
+                                                                np.ravel(basic_features_theta), 
+                                                                np.ravel(basic_features_alpha), 
+                                                                np.ravel(basic_features_beta), 
+                                                                np.ravel(basic_features_gamma)])
+                features_with_timestamps.append(combined_features_with_timestamp)
 
 
     return np.array(features_with_timestamps)
