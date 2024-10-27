@@ -146,8 +146,8 @@ def preprocess_and_extract_features_mne_with_timestamps(file_name):
             if idx in channel_indexes:
                 basic_features = extract_basic_features(channel_data)
                 # advanced_features = extract_advanced_features(channel_data, sfreq)
-                wavelet_features = extract_wavelet_features(channel_data, sfreq)
-                combined_channels_features = np.concatenate([combined_channels_features, basic_features, wavelet_features]) if combined_channels_features is not None else np.concatenate([basic_features, wavelet_features])
+                # wavelet_features = extract_wavelet_features(channel_data, sfreq)
+                combined_channels_features = np.concatenate([combined_channels_features, basic_features]) if combined_channels_features is not None else np.concatenate([basic_features])
 
         # 将特征与时间戳结合
         combined_features = np.concatenate([[timestamp], combined_channels_features])
