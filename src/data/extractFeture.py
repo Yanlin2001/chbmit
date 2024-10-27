@@ -143,11 +143,16 @@ def preprocess_and_extract_features_mne_with_timestamps(file_name):
         window_data_raw = np.squeeze(window_data_raw)
 
         # 对每个子带提取窗口数据
-        window_data_delta = delta[:, start:end].get_data()[0]
-        window_data_theta = theta[:, start:end].get_data()[0]
-        window_data_alpha = alpha[:, start:end].get_data()[0]
-        window_data_beta = beta[:, start:end].get_data()[0]
-        window_data_gamma = gamma[:, start:end].get_data()[0]
+        window_data_delta, _ = delta[:, start:end]
+        window_data_delta = np.squeeze(window_data_delta)
+        window_data_theta, _ = theta[:, start:end]
+        window_data_theta = np.squeeze(window_data_theta)
+        window_data_alpha, _ = alpha[:, start:end]
+        window_data_alpha = np.squeeze(window_data_alpha)
+        window_data_beta, _ = beta[:, start:end]
+        window_data_beta = np.squeeze(window_data_beta)
+        window_data_gamma, _ = gamma[:, start:end]
+        window_data_gamma = np.squeeze(window_data_gamma)
 
         # 获取窗口的开始时间戳
         timestamp = raw.times[start]
@@ -157,7 +162,6 @@ def preprocess_and_extract_features_mne_with_timestamps(file_name):
 
         # 提取原始信号的基本特征
         basic_features_raw = extract_basic_features(window_data_raw)
-        all_features.append(basic_features_raw)
 
         # 提取delta子带的基本特征
         basic_features_delta = extract_basic_features(window_data_delta)
@@ -178,3 +182,4 @@ def preprocess_and_extract_features_mne_with_timestamps(file_name):
         combined_features_with_timestamp = np.concatenate([[timestamp], basic_features_raw, basic_features_delta, basic_features_theta, basic_features_alpha, basic_features_beta, basic_features_gamma])
         features_with_timestamps.append(combined_features_with_timestamp)
     return np.array(features_with_timestamps)
+
