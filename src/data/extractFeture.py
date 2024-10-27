@@ -133,6 +133,7 @@ def preprocess_and_extract_features_mne_with_timestamps(file_name):
     total_windows = len(raw.times) // window_samples
 
     # 使用tqdm包装range对象以显示进度条
+
     for start in tqdm(range(0, len(raw.times), window_samples), total=total_windows, desc="Processing windows"):
         end = start + window_samples
         if end > len(raw.times):
@@ -144,42 +145,43 @@ def preprocess_and_extract_features_mne_with_timestamps(file_name):
 
         # 对每个子带提取窗口数据
         window_data_delta, _ = delta[:, start:end]
-        window_data_delta = np.squeeze(window_data_delta)
         window_data_theta, _ = theta[:, start:end]
-        window_data_theta = np.squeeze(window_data_theta)
         window_data_alpha, _ = alpha[:, start:end]
-        window_data_alpha = np.squeeze(window_data_alpha)
         window_data_beta, _ = beta[:, start:end]
-        window_data_beta = np.squeeze(window_data_beta)
         window_data_gamma, _ = gamma[:, start:end]
+
+        window_data_delta = np.squeeze(window_data_delta)
+        window_data_theta = np.squeeze(window_data_theta)
+        window_data_alpha = np.squeeze(window_data_alpha)
+        window_data_beta = np.squeeze(window_data_beta)
         window_data_gamma = np.squeeze(window_data_gamma)
+
 
         # 获取窗口的开始时间戳
         timestamp = raw.times[start]
 
-        # 初始化一个空数组来存储所有特征
-        all_features = []
+        channel_indexes = list(range(0, 22))  # 通道索引范围
 
-        # 提取原始信号的基本特征
-        basic_features_raw = extract_basic_features(window_data_raw)
+        for idx, (raw_data, delta_data, theta_data, alpha_data, beta_data, gamma_data) in enumerate(zip(window_data_raw, window_data_delta, window_data_theta, window_data_alpha, window_data_beta, window_data_gamma)):
+            if idx in channel_indexes:
+                # 提取原始信号的基本特征
+                basic_features_raw = extract_basic_features(raw_data)
+                basic_features_delta = extract_basic_features(delta_data)
+                basic_features_theta = extract_basic_features(theta_data)
+                basic_features_alpha = extract_basic_features(alpha_data)
+                basic_features_beta = extract_basic_features(beta_data)
+                basic_features_gamma = extract_basic_features(gamma_data)
 
-        # 提取delta子带的基本特征
-        basic_features_delta = extract_basic_features(window_data_delta)
+                # 确保特征都是一维的
+                combined_features_with_timestamp = np.concatenate([[timestamp], 
+                                                                np.ravel(basic_features_raw), 
+                                                                np.ravel(basic_features_delta), 
+                                                                np.ravel(basic_features_theta), 
+                                                                np.ravel(basic_features_alpha), 
+                                                                np.ravel(basic_features_beta), 
+                                                                np.ravel(basic_features_gamma)])
+                features_with_timestamps.append(combined_features_with_timestamp)
 
-        # 提取theta子带的基本特征
-        basic_features_theta = extract_basic_features(window_data_theta)
 
-        # 提取alpha子带的基本特征
-        basic_features_alpha = extract_basic_features(window_data_alpha)
-
-        # 提取beta子带的基本特征
-        basic_features_beta = extract_basic_features(window_data_beta)
-
-        # 提取gamma子带的基本特征
-        basic_features_gamma = extract_basic_features(window_data_gamma)
-
-        # 将特征与时间戳结合
-        combined_features_with_timestamp = np.concatenate([[timestamp], basic_features_raw, basic_features_delta, basic_features_theta, basic_features_alpha, basic_features_beta, basic_features_gamma])
-        features_with_timestamps.append(combined_features_with_timestamp)
     return np.array(features_with_timestamps)
 
