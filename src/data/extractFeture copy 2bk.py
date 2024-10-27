@@ -114,13 +114,6 @@ def preprocess_and_extract_features_mne_with_timestamps(file_name):
     # 选择 EEG 通道
     raw.pick_types(meg=False, eeg=True, eog=False)
 
-    # 分解delta、theta、alpha、beta、gamma频段
-    delta = raw.copy().filter(1, 4, fir_design='firwin')
-    theta = raw.copy().filter(4, 8, fir_design='firwin')
-    alpha = raw.copy().filter(8, 12, fir_design='firwin')
-    beta = raw.copy().filter(12, 30, fir_design='firwin')
-    gamma = raw.copy().filter(30, 50, fir_design='firwin')
-
     # 定义短时间窗口的参数
     window_length = 4  # 窗口长度（秒）
     sfreq = raw.info['sfreq']  # 采样频率
@@ -138,51 +131,49 @@ def preprocess_and_extract_features_mne_with_timestamps(file_name):
         if end > len(raw.times):
             break
 
-        # 提取并预处理这个窗口中的原始数据
-        window_data_raw, times = raw[:, start:end]
-        window_data_raw = np.squeeze(window_data_raw)
-
-        # 对每个子带提取窗口数据
-        window_data_delta = delta[:, start:end].get_data()[0]
-        window_data_theta = theta[:, start:end].get_data()[0]
-        window_data_alpha = alpha[:, start:end].get_data()[0]
-        window_data_beta = beta[:, start:end].get_data()[0]
-        window_data_gamma = gamma[:, start:end].get_data()[0]
+        # 提取并预处理这个窗口中的数据
+        window_data, times = raw[:, start:end]
+        window_data = np.squeeze(window_data)
 
         # 获取窗口的开始时间戳
         timestamp = raw.times[start]
+        # 定义需要提取特征的通道索引
+        channel_indexes = [3, 4, 8, 15]
+        # 为每个通道的每个窗口提取基础和高级特征
+        combined_channels_features = None
 
-        # 初始化一个空数组来存储所有特征
-        all_features = []
-
-        # 提取原始信号的基本特征
-        basic_features_raw = extract_basic_features(window_data_raw)
-        all_features.append(basic_features_raw)
-
-        # 提取delta子带的基本特征
-        basic_features_delta = extract_basic_features(window_data_delta)
-        all_features.append(basic_features_delta)
-
-        # 提取theta子带的基本特征
-        basic_features_theta = extract_basic_features(window_data_theta)
-        all_features.append(basic_features_theta)
-
-        # 提取alpha子带的基本特征
-        basic_features_alpha = extract_basic_features(window_data_alpha)
-        all_features.append(basic_features_alpha)
-
-        # 提取beta子带的基本特征
-        basic_features_beta = extract_basic_features(window_data_beta)
-        all_features.append(basic_features_beta)
-
-        # 提取gamma子带的基本特征
-        basic_features_gamma = extract_basic_features(window_data_gamma)
-        all_features.append(basic_features_gamma)
-
-        # 将所有特征连接起来
-        combined_features = np.concatenate(all_features)
+        for idx, channel_data in enumerate(window_data):
+            if idx in channel_indexes:
+                basic_features = extract_basic_features(channel_data)
+                # advanced_features = extract_advanced_features(channel_data, sfreq)
+                # wavelet_features = extract_wavelet_features(channel_data, sfreq)
+                combined_channels_features = np.concatenate([combined_channels_features, basic_features]) if combined_channels_features is not None else np.concatenate([basic_features])
 
         # 将特征与时间戳结合
-        combined_features_with_timestamp = np.concatenate([[timestamp], combined_features])
-        features_with_timestamps.append(combined_features_with_timestamp)
+        combined_features = np.concatenate([[timestamp], combined_channels_features])
+        features_with_timestamps.append(combined_features)
+
+    '''    # 用于存储拼接后的数组
+        updated_features = []
+
+        # 遍历 features_with_timestamps
+        for i in range(len(features_with_timestamps)):
+            current_array = features_with_timestamps[i]
+            
+            # 如果当前索引大于等于 15，拼接序号比自身小 15 的数组
+            if i >= 15:
+                # 取出序号比当前小 15 的数组
+                to_concat = features_with_timestamps[i - 15]
+                # 拼接数组
+                # 数据作差
+                # diff = current_array[1:] - to_concat[1:]
+                current_array = np.concatenate((current_array, to_concat[1:]))
+            
+            # 只将进行拼接操作的数组添加到新的列表
+            if i >= 15:  # 只保留进行拼接操作的数组
+                updated_features.append(current_array)
+
+        # 用拼接后的数组更新原始列表
+        features_with_timestamps = updated_features'''
+
     return np.array(features_with_timestamps)
