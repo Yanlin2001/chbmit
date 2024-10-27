@@ -166,12 +166,12 @@ def preprocess_and_extract_features_mne_with_timestamps(file_name, seizure_start
         for idx, (raw_data, delta_data, theta_data, alpha_data, beta_data, gamma_data) in enumerate(zip(window_data_raw, window_data_delta, window_data_theta, window_data_alpha, window_data_beta, window_data_gamma)):
             if idx in channel_indexes:
                 # 提取原始信号的基本特征
-                basic_features_raw = extract_wavelet_features(raw_data)
-                basic_features_delta = extract_wavelet_features(delta_data)
-                basic_features_theta = extract_wavelet_features(theta_data)
-                basic_features_alpha = extract_wavelet_features(alpha_data)
-                basic_features_beta = extract_wavelet_features(beta_data)
-                basic_features_gamma = extract_wavelet_features(gamma_data)
+                basic_features_raw = extract_wavelet_features(raw_data, 256)
+                basic_features_delta = extract_wavelet_features(delta_data, 256)
+                basic_features_theta = extract_wavelet_features(theta_data, 256)
+                basic_features_alpha = extract_wavelet_features(alpha_data, 256)
+                basic_features_beta = extract_wavelet_features(beta_data, 256)
+                basic_features_gamma = extract_wavelet_features(gamma_data, 256)
 
                 # 确保特征都是一维的
                 combined_channels_features = np.concatenate([
