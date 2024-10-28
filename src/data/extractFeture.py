@@ -119,12 +119,12 @@ def preprocess_and_extract_features_mne_with_timestamps(
     # 选择 EEG 通道
     raw.pick_types(meg=False, eeg=True, eog=False)
 
-    channel_indexes = [3, 4, 8, 15] 
+    channel_indexes = [15] 
     # 打印channel_indexes对应的通道名称
     for idx in channel_indexes:
         print("channel_name:",raw.ch_names[idx])
 
-        
+
     # 分解delta、theta、alpha、beta、gamma频段
     delta = raw.copy().filter(1, 4, fir_design='firwin')
     theta = raw.copy().filter(4, 8, fir_design='firwin')
@@ -173,7 +173,7 @@ def preprocess_and_extract_features_mne_with_timestamps(
         timestamp = raw.times[start]
         # 间隔1个通道提取特征
         #channel_indexes = list(range(0, 23))
-        channel_indexes = [3, 4, 8, 15]  # 通道索引范围
+        channel_indexes = [15]  # 通道索引范围
         combined_channels_features = None
         for idx, (raw_data, delta_data, theta_data, alpha_data, beta_data, gamma_data) in enumerate(zip(window_data_raw, window_data_delta, window_data_theta, window_data_alpha, window_data_beta, window_data_gamma)):
             if idx in channel_indexes:
