@@ -116,15 +116,35 @@ def preprocess_and_extract_features_mne_with_timestamps(
     # 应用带通滤波器
     raw.filter(1., 50., fir_design='firwin')
 
+    # 打印通道名称
+    print(raw.ch_names)
+
+    # 选择 EEG 通道*
+    ''' TOUSE = ['FP1-F7', 'F7-T7', 'T7-P7', 'P7-O1', 'FP1-F3', 'F3-C3', 'C3-P3', 'P3-O1',
+         'FP2-F4', 'F4-C4', 'C4-P4', 'P4-O2', 'FP2-F8', 'F8-T8', 'T8-P8-0', 'P8-O2',
+         'FZ-CZ', 'CZ-PZ', 'P7-T7', 'T7-FT9', 'FT9-FT10', 'FT10-T8', 'T8-P8-1']'''
+    
+    TOUSE = ['FP1-F7', 'F7-T7', 'T7-P7', 'P7-O1', 'FP1-F3', 'F3-C3', 'C3-P3', 'P3-O1',
+         'FZ-CZ', 'CZ-PZ', 'FP2-F4', 'F4-C4', 'C4-P4', 'P4-O2', 'FP2-F8', 'F8-T8', 'T8-P8-0', 'P8-O2']
+    
     # 选择 EEG 通道
     raw.pick_types(meg=False, eeg=True, eog=False)
 
-    channel_indexes = [3, 4, 8, 15] 
-    # 打印channel_indexes对应的通道名称
-    for idx in channel_indexes:
-        print("channel_name:",raw.ch_names[idx])
+    # 检查 TOUSE 中的通道是否都在 raw 中 *
+    available_channels = raw.ch_names
+    missing_channels = [ch for ch in TOUSE if ch not in available_channels]
+    if missing_channels:
+        raise ValueError(f"Missing channels in data: {missing_channels}")
 
-        
+    # 选择 TOUSE 中的通道
+    # raw.pick_channels(TOUSE)
+
+    # 重新排序通道
+    # raw.reorder_channels(TOUSE)
+
+    # 打印当前选择的通道
+    print(raw.ch_names)
+
     # 分解delta、theta、alpha、beta、gamma频段
     delta = raw.copy().filter(1, 4, fir_design='firwin')
     theta = raw.copy().filter(4, 8, fir_design='firwin')
@@ -139,6 +159,7 @@ def preprocess_and_extract_features_mne_with_timestamps(
 
     # 初始化一个空列表来存储特征和时间戳
     features_with_timestamps = []
+
 
     # 获取总窗口数以便在进度条中使用
     total_windows = len(raw.times) // window_samples
@@ -172,8 +193,8 @@ def preprocess_and_extract_features_mne_with_timestamps(
         # 获取窗口的开始时间戳
         timestamp = raw.times[start]
         # 间隔1个通道提取特征
-        #channel_indexes = list(range(0, 23))
-        channel_indexes = [3, 4, 8, 15]  # 通道索引范围
+        channel_indexes = list(range(0, 23))
+        #channel_indexes = [3, 4, 8, 15]  # 通道索引范围
         combined_channels_features = None
         for idx, (raw_data, delta_data, theta_data, alpha_data, beta_data, gamma_data) in enumerate(zip(window_data_raw, window_data_delta, window_data_theta, window_data_alpha, window_data_beta, window_data_gamma)):
             if idx in channel_indexes:
@@ -205,3 +226,4 @@ def preprocess_and_extract_features_mne_with_timestamps(
 
 
     return np.array(features_with_timestamps)
+
