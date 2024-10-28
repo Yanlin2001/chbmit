@@ -90,7 +90,12 @@ def extract_wavelet_features(signal, sfreq):
 
     return wavelet_features
 
-def preprocess_and_extract_features_mne_with_timestamps(file_name, seizure_start_time, seizure_end_time):  
+def preprocess_and_extract_features_mne_with_timestamps(
+        file_name, 
+        seizure_start_time, 
+        seizure_end_time,
+        train=True,
+        use_swin = False):
     """
     使用 mne 库预处理 EEG 数据，并提取基础和高级特征。
     在每个特征数组的开头加入对应的时间戳。
@@ -131,9 +136,10 @@ def preprocess_and_extract_features_mne_with_timestamps(file_name, seizure_start
 
     # 获取总窗口数以便在进度条中使用
     total_windows = len(raw.times) // window_samples
+    seizure_start_sample = int((seizure_start_time - 16 * 60) * sfreq)
+    seizure_end_sample = int((seizure_end_time + 16 * 60) * sfreq)
 
     # 使用tqdm包装range对象以显示进度条
-
     for start in tqdm(range(0, len(raw.times), window_samples), total=total_windows, desc="Processing windows"):
         end = start + window_samples
         if end > len(raw.times):
@@ -160,7 +166,7 @@ def preprocess_and_extract_features_mne_with_timestamps(file_name, seizure_start
         # 获取窗口的开始时间戳
         timestamp = raw.times[start]
         # 间隔1个通道提取特征
-        channel_indexes = list(range(0, 22))
+        channel_indexes = list(range(0, 23))
         #channel_indexes = [3, 4, 8, 15]  # 通道索引范围
         combined_channels_features = None
         for idx, (raw_data, delta_data, theta_data, alpha_data, beta_data, gamma_data) in enumerate(zip(window_data_raw, window_data_delta, window_data_theta, window_data_alpha, window_data_beta, window_data_gamma)):

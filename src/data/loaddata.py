@@ -9,7 +9,7 @@ def extract_data_and_labels(edf_file_path, summary_file_path):
     # 提取标签
     seizure_start_time, seizure_end_time = extractTarget(summary_file_path, edf_file_path)
     # 提取特征
-    X = preprocess_and_extract_features_mne_with_timestamps(edf_file_path, seizure_start_time, seizure_end_time)
+    X = preprocess_and_extract_features_mne_with_timestamps(edf_file_path, seizure_start_time, seizure_end_time, train=True, use_swin=False)
     y = np.array([1 if seizure_start_time <= row[0] <= seizure_end_time else 0 for row in X])
 
     #从X数组中移除第一列Time
